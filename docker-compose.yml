@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   redbot:
-    image: ghcr.io/moldytaint/red-discord-bot-docker-:latest
+    image: ghcr.io/moldytaint/red-discord-bot-docker:latest
     build: .
     volumes:
       - redbot_data:/app/data

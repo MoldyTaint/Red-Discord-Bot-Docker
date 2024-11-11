@@ -12,7 +12,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # Remove the trailing hyphen from the image name
+  IMAGE_NAME: moldytaint/red-discord-bot-docker
 
 jobs:
   build-and-push:
