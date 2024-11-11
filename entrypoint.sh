@@ -25,6 +25,41 @@ setup_basic_config() {
     if [ -z "$REDBOT_LOCALE" ]; then
         export REDBOT_LOCALE="en-US"
     fi
+
+    # Create basic config file
+    local config_dir="/app/data/config/instance"
+    mkdir -p "$config_dir"
+    cat > "$config_dir/core.json" <<EOF
+{
+    "token": "${DISCORD_TOKEN}",
+    "prefix": ["${BOT_PREFIX}"],
+    "locale": "${REDBOT_LOCALE}",
+    "no_cog_init": false,
+    "owner": null,
+    "owner_id": null,
+    "embeds": true,
+    "color": 15158332,
+    "help__page_char_limit": 1000,
+    "help__max_pages_in_guild": 2,
+    "help__tagline": "Red V3",
+    "help__use_menus": true,
+    "help__show_hidden": false,
+    "help__verify_checks": true,
+    "help__verify_exists": true,
+    "help__sort_commands": true,
+    "help__commands_heading": "Commands:",
+    "help__subcommands_heading": "Subcommands:",
+    "help__aliases_heading": "Aliases:",
+    "description": null,
+    "invite_public": true,
+    "invite_perm": 8,
+    "invite_commands_scope": true,
+    "disabled_commands": [],
+    "disabled_command_msg": "That command is disabled.",
+    "extra_owner_destinations": [],
+    "extra_owner_dest_ids": []
+}
+EOF
 }
 
 # Function to configure Lavalink
@@ -75,6 +110,18 @@ EOF
 EOF
 }
 
+# Verify token exists
+if [ -z "$DISCORD_TOKEN" ]; then
+    log "Error: DISCORD_TOKEN is not set!"
+    exit 1
+fi
+
+# Set default prefix if not provided
+if [ -z "$BOT_PREFIX" ]; then
+    export BOT_PREFIX="!"
+    log "No prefix specified, using default: !"
+fi
+
 # Clean up existing instance if it exists
 if [ -d "/app/data/data/instance" ]; then
     log "Removing existing instance..."
@@ -122,20 +169,6 @@ if [ "$ENABLE_AUDIO" = "true" ]; then
     fi
 fi
 
-# Verify token exists
-if [ -z "$DISCORD_TOKEN" ]; then
-    log "Error: DISCORD_TOKEN is not set!"
-    exit 1
-fi
-
-# Set default prefix if not provided
-if [ -z "$BOT_PREFIX" ]; then
-    export BOT_PREFIX="!"
-    log "No prefix specified, using default: !"
-fi
-
 log "Starting Red Discord bot..."
 exec redbot instance \
-    --token "$DISCORD_TOKEN" \
-    --prefix "$BOT_PREFIX" \
     --no-prompt
