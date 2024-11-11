@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  redbot:
+    image: ghcr.io/moldytaint/red-discord-bot-docker-:latest
+    build: .
+    volumes:
+      - redbot_data:/app/data
+      - redbot_config:/app/data/config
+      - redbot_audio:/app/data/audio_cache  # Separate volume for audio cache
+    env_file:
+      - .env
+    restart: unless-stopped
+    # Resource limits to prevent memory/CPU issues
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    # Healthcheck to ensure bot is running
+    healthcheck:
+      test: ["CMD", "ps", "aux", "|", "grep", "redbot", "||", "exit", "1"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    # Additional host configuration
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0  # Enable IPv6 for better connectivity
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - redbot_network
+
+  # Optional Lavalink service (uncomment to use)
+  # lavalink:
+  #   image: fredboat/lavalink:latest
+  #   volumes:
+  #     - ./lavalink-application.yml:/opt/Lavalink/application.yml
+  #   networks:
+  #     - redbot_network
+  #   restart: unless-stopped
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 1G
+  #       reservations:
+  #         memory: 256M
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:2333/version"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+volumes:
+  redbot_data:
+    name: redbot_data
+  redbot_config:
+    name: redbot_config
+  redbot_audio:
+    name: redbot_audio
+
+networks:
+  redbot_network:
+    name: redbot_network

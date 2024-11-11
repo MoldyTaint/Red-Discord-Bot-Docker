@@ -1,0 +1,13 @@
+# Environment files
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Docker
+.docker/
+
+# Bot data
+data/
