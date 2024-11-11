@@ -63,7 +63,12 @@ cat > "/app/data/config/instance/core.json" <<EOF
     "use_slash_commands": true,
     "slash_commands": true,
     "force_slash_commands": true,
-    "use_app_commands": true
+    "use_app_commands": true,
+    "prefer_guild_commands": true,
+    "sync_commands": true,
+    "sync_commands_on_start": true,
+    "sync_commands_globally": false,
+    "sync_permissions": true
 }
 EOF
 
