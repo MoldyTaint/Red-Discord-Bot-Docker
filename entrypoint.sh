@@ -76,6 +76,58 @@ EOF
 log "Initializing Red Discord bot instance..."
 redbot-setup --no-prompt --instance-name instance --data-path /app/data
 
+# Setup Audio configuration first
+if [ "$ENABLE_AUDIO" = "true" ]; then
+    log "Setting up audio features..."
+    mkdir -p "/app/data/config/instance/Audio"
+    
+    # Configure audio settings before loading the cog
+    cat > "/app/data/config/instance/Audio/settings.json" <<EOF
+{
+    "use_external_lavalink": true,
+    "localtrack_folder": "/app/data/audio_cache",
+    "max_queue_size": 1000,
+    "auto_play": false,
+    "disconnect": false,
+    "daily_playlists": false,
+    "global_db": true,
+    "global_db_get_timeout": 5,
+    "status": false,
+    "server_local": false,
+    "restrict": true,
+    "jukebox": false,
+    "jukebox_price": 0,
+    "countrycode": "US",
+    "prefer_lyrics": false,
+    "empty_queue_timeout": 0,
+    "volume": 100,
+    "managed_node_controller": false,
+    "use_managed_node": false,
+    "auto_update_managed_node": false,
+    "download_managed_node": false
+}
+EOF
+    
+    # Configure Lavalink nodes
+    if [ ! -z "$LAVALINK_NODES" ]; then
+        echo "$LAVALINK_NODES" > "/app/data/config/instance/Audio/external_nodes.json"
+    else
+        cat > "/app/data/config/instance/Audio/external_nodes.json" <<EOF
+[
+    {
+        "host": "${LAVALINK_HOST}",
+        "port": ${LAVALINK_PORT},
+        "password": "${LAVALINK_PASSWORD}",
+        "ssl": ${LAVALINK_SSL:-false},
+        "name": "primary"
+    }
+]
+EOF
+    fi
+    
+    log "Audio configuration completed"
+fi
+
 # Function to install cogs
 install_cogs() {
     local cog=$1
@@ -119,53 +171,9 @@ if [ ! -z "$REDBOT_COGS" ]; then
     done
 fi
 
-# Setup audio if enabled
+# Load Audio cog last if enabled
 if [ "$ENABLE_AUDIO" = "true" ]; then
-    log "Setting up audio features..."
-    mkdir -p "/app/data/config/instance/Audio"
-    
-    # Configure audio settings
-    cat > "/app/data/config/instance/Audio/settings.json" <<EOF
-{
-    "use_external_lavalink": true,
-    "localtrack_folder": "/app/data/audio_cache",
-    "max_queue_size": 1000,
-    "auto_play": false,
-    "disconnect": false,
-    "daily_playlists": false,
-    "global_db": true,
-    "global_db_get_timeout": 5,
-    "status": false,
-    "server_local": false,
-    "restrict": true,
-    "jukebox": false,
-    "jukebox_price": 0,
-    "countrycode": "US",
-    "prefer_lyrics": false,
-    "empty_queue_timeout": 0,
-    "volume": 100,
-    "managed_node_controller": false
-}
-EOF
-    
-    # Configure Lavalink nodes
-    if [ ! -z "$LAVALINK_NODES" ]; then
-        echo "$LAVALINK_NODES" > "/app/data/config/instance/Audio/external_nodes.json"
-    else
-        cat > "/app/data/config/instance/Audio/external_nodes.json" <<EOF
-[
-    {
-        "host": "${LAVALINK_HOST}",
-        "port": ${LAVALINK_PORT},
-        "password": "${LAVALINK_PASSWORD}",
-        "ssl": ${LAVALINK_SSL:-false},
-        "name": "primary"
-    }
-]
-EOF
-    fi
-    
-    log "Audio configuration completed"
+    log "Loading Audio cog..."
     redbot instance --no-prompt --load-cogs audio --token "${DISCORD_TOKEN}" --prefix "${BOT_PREFIX}"
 fi
 
