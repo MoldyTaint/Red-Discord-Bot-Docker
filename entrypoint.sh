@@ -68,7 +68,38 @@ cat > "/app/data/config/instance/core.json" <<EOF
     "sync_commands": true,
     "sync_commands_on_start": true,
     "sync_commands_globally": false,
-    "sync_permissions": true
+    "sync_permissions": true,
+    "app_command_permissions": true,
+    "app_command_default_member_permissions": true,
+    "app_command_guild_permissions": true,
+    "app_command_autocomplete": true,
+    "app_command_options": true,
+    "app_command_choices": true,
+    "app_command_descriptions": true,
+    "app_command_dm_permission": true,
+    "app_command_localization": true,
+    "app_command_nsfw": true,
+    "intents": {
+        "guilds": true,
+        "members": true,
+        "bans": true,
+        "emojis": true,
+        "integrations": true,
+        "webhooks": true,
+        "invites": true,
+        "voice_states": true,
+        "presences": true,
+        "guild_messages": true,
+        "dm_messages": true,
+        "guild_reactions": true,
+        "dm_reactions": true,
+        "guild_typing": true,
+        "dm_typing": true,
+        "message_content": true,
+        "guild_scheduled_events": true,
+        "auto_moderation_configuration": true,
+        "auto_moderation_execution": true
+    }
 }
 EOF
 
