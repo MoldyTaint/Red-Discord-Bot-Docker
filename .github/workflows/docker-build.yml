@@ -64,26 +64,19 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
 
-      # Build and push Docker image
-      - name: Build and push Docker image
-        id: build-and-push
+      # Build Docker image locally first
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
+          load: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
 
-      # Scan the local image for vulnerabilities
+      # Scan the locally built image
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
-        if: github.event_name != 'pull_request'
         with:
-          image-ref: ${{ steps.build-and-push.outputs.imageid }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
@@ -92,10 +85,24 @@ jobs:
       # Upload scan results
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
-        if: github.event_name != 'pull_request' && always()
+        if: always()
         with:
           sarif_file: 'trivy-results.sarif'
           category: 'Trivy'
+
+      # Build and push final image if not a PR
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        if: github.event_name != 'pull_request'
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
 
       # Create GitHub Release for tags
       - name: Create Release
