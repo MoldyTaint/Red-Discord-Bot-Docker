@@ -59,8 +59,12 @@ cat > "/app/data/config/instance/core.json" <<EOF
     "disabled_command_msg": "That command is disabled.",
     "extra_owner_destinations": [],
     "extra_owner_dest_ids": [],
-    "hybrid_commands": true,
-    "use_buttons": true
+    "hybrid_commands": false,
+    "use_buttons": true,
+    "use_slash_commands": true,
+    "slash_commands": true,
+    "force_slash_commands": true,
+    "use_app_commands": true
 }
 EOF
 
