@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 # Function to log messages
@@ -17,15 +17,16 @@ if [ -z "$BOT_PREFIX" ]; then
     log "No prefix specified, using default: !"
 fi
 
-# Clean up existing instance if it exists
+# Clean up existing instance if it exists, but preserve volume mounts
+log "Cleaning up existing data..."
 if [ -d "/app/data" ]; then
-    log "Cleaning up existing data..."
-    rm -rf /app/data/*
+    find /app/data -mindepth 1 -maxdepth 1 ! -name 'audio_cache' -exec rm -rf {} +
 fi
 
 # Create necessary directories
 log "Creating directory structure..."
 mkdir -p /app/data/config/instance
+mkdir -p /app/data/audio_cache
 
 # Create core configuration
 log "Creating core configuration..."
