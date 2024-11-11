@@ -59,7 +59,6 @@ cat > "/app/data/config/instance/core.json" <<EOF
     "disabled_command_msg": "That command is disabled.",
     "extra_owner_destinations": [],
     "extra_owner_dest_ids": [],
-    "hybrid_commands": false,
     "use_buttons": true,
     "use_slash_commands": true,
     "slash_commands": true,
@@ -81,6 +80,19 @@ install_cogs() {
         return 1
     }
 }
+
+# Setup Streams configuration if Twitch credentials are provided
+if [ ! -z "$TWITCH_CLIENT_ID" ] && [ ! -z "$TWITCH_CLIENT_SECRET" ]; then
+    log "Setting up Twitch configuration..."
+    mkdir -p "/app/data/config/instance/Streams"
+    cat > "/app/data/config/instance/Streams/settings.json" <<EOF
+{
+    "twitch_client_id": "${TWITCH_CLIENT_ID}",
+    "twitch_client_secret": "${TWITCH_CLIENT_SECRET}",
+    "enable_twitch": true
+}
+EOF
+fi
 
 # Install default cogs if specified
 if [ ! -z "$DEFAULT_COGS" ]; then
@@ -107,33 +119,10 @@ if [ "$ENABLE_AUDIO" = "true" ]; then
     log "Setting up audio features..."
     mkdir -p "/app/data/config/instance/Audio"
     
-    if [ "$USE_LAVALINK" = "true" ]; then
-        if [ -z "$LAVALINK_HOST" ] || [ -z "$LAVALINK_PORT" ] || [ -z "$LAVALINK_PASSWORD" ]; then
-            log "Error: Lavalink is enabled but required configuration is missing!"
-            exit 1
-        fi
-        
-        # Configure Lavalink nodes
-        if [ ! -z "$LAVALINK_NODES" ]; then
-            echo "$LAVALINK_NODES" > "/app/data/config/instance/Audio/external_nodes.json"
-        else
-            cat > "/app/data/config/instance/Audio/external_nodes.json" <<EOF
-[
-    {
-        "host": "${LAVALINK_HOST}",
-        "port": ${LAVALINK_PORT},
-        "password": "${LAVALINK_PASSWORD}",
-        "ssl": ${LAVALINK_SSL:-false},
-        "name": "primary"
-    }
-]
-EOF
-        fi
-        
-        # Configure audio settings
-        cat > "/app/data/config/instance/Audio/settings.json" <<EOF
+    # Configure audio settings
+    cat > "/app/data/config/instance/Audio/settings.json" <<EOF
 {
-    "use_external_lavalink": ${USE_LAVALINK:-false},
+    "use_external_lavalink": true,
     "localtrack_folder": "/app/data/audio_cache",
     "max_queue_size": 1000,
     "auto_play": false,
@@ -149,12 +138,29 @@ EOF
     "countrycode": "US",
     "prefer_lyrics": false,
     "empty_queue_timeout": 0,
-    "volume": 100
+    "volume": 100,
+    "managed_node_controller": false
 }
 EOF
-        log "Lavalink configuration completed"
+    
+    # Configure Lavalink nodes
+    if [ ! -z "$LAVALINK_NODES" ]; then
+        echo "$LAVALINK_NODES" > "/app/data/config/instance/Audio/external_nodes.json"
+    else
+        cat > "/app/data/config/instance/Audio/external_nodes.json" <<EOF
+[
+    {
+        "host": "${LAVALINK_HOST}",
+        "port": ${LAVALINK_PORT},
+        "password": "${LAVALINK_PASSWORD}",
+        "ssl": ${LAVALINK_SSL:-false},
+        "name": "primary"
+    }
+]
+EOF
     fi
     
+    log "Audio configuration completed"
     redbot instance --no-prompt --load-cogs audio --token "${DISCORD_TOKEN}" --prefix "${BOT_PREFIX}"
 fi
 
