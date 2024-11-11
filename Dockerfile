@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Install system dependencies
+# Install system dependencies including Java 17
 RUN apt-get update && \
     apt-get install -y \
     git \
@@ -17,6 +17,8 @@ RUN apt-get update && \
     # Required for some cogs
     wget \
     unzip \
+    # Required for Lavalink
+    openjdk-17-jre-headless \
     # Cleanup
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
