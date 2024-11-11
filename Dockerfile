@@ -14,8 +14,6 @@ RUN apt-get update && \
     libopus-dev \
     # Required for voice support
     libsodium-dev \
-    # Required for audio playback
-    youtube-dl \
     # Required for some cogs
     wget \
     unzip \
@@ -29,15 +27,12 @@ RUN useradd -m -u 1000 redbot
 # Set working directory
 WORKDIR /app
 
-# Install Red-DiscordBot and common dependencies
-RUN pip install -U pip setuptools wheel && \
-    pip install Red-DiscordBot[voice] && \
-    # Install common audio-related dependencies
-    pip install youtube_dl && \
-    pip install PyNaCl
+# Copy requirements first for better caching
+COPY requirements.txt .
 
-# Pre-install common cogs dependencies
-RUN pip install beautifulsoup4 tabulate matplotlib pillow
+# Install dependencies
+RUN pip install -U pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh

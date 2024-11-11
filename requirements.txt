@@ -1,0 +1,8 @@
+Red-DiscordBot[voice]
+youtube_dl
+yt-dlp
+PyNaCl
+beautifulsoup4
+tabulate
+matplotlib
+pillow

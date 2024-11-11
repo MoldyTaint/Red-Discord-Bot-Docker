@@ -6,7 +6,6 @@ services:
     build: .
     volumes:
       - redbot_data:/app/data
-      - redbot_config:/app/data/config
       - redbot_audio:/app/data/audio_cache  # Separate volume for audio cache
     env_file:
       - .env
@@ -18,12 +17,13 @@ services:
           memory: 2G
         reservations:
           memory: 512M
-    # Healthcheck to ensure bot is running
+    # Improved healthcheck to properly detect bot status
     healthcheck:
-      test: ["CMD", "ps", "aux", "|", "grep", "redbot", "||", "exit", "1"]
-      interval: 1m
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep -q redbot || exit 1"]
+      interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
     # Security options
     security_opt:
       - no-new-privileges:true
@@ -54,16 +54,15 @@ services:
   #       reservations:
   #         memory: 256M
   #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:2333/version"]
+  #     test: ["CMD-SHELL", "curl -f http://localhost:2333/version || exit 1"]
   #     interval: 30s
   #     timeout: 10s
   #     retries: 3
+  #     start_period: 15s
 
 volumes:
   redbot_data:
     name: redbot_data
-  redbot_config:
-    name: redbot_config
   redbot_audio:
     name: redbot_audio
 

@@ -75,12 +75,16 @@ EOF
 EOF
 }
 
-# Initialize instance if it doesn't exist
-if [ ! -d "/app/data/data/instance" ]; then
-    log "Initializing new Red Discord bot instance..."
-    redbot-setup --no-prompt --instance-name instance --data-path /app/data
-    setup_basic_config
+# Clean up existing instance if it exists
+if [ -d "/app/data/data/instance" ]; then
+    log "Removing existing instance..."
+    rm -rf /app/data/data/instance
 fi
+
+# Initialize instance
+log "Initializing new Red Discord bot instance..."
+redbot-setup --no-prompt --instance-name instance --data-path /app/data --overwrite-existing-instance
+setup_basic_config
 
 # Install default cogs if specified
 if [ ! -z "$DEFAULT_COGS" ]; then
