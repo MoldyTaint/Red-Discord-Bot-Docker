@@ -22,8 +22,8 @@ This repository contains a fully-featured Dockerized version of the [Red-Discord
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/MoldyTaint/Red-Discord-Bot-Docker-
-cd Red-Discord-Bot-Docker-
+git clone https://github.com/MoldyTaint/Red-Discord-Bot-Docker
+cd Red-Discord-Bot-Docker
 ```
 
 2. Create your environment file:
