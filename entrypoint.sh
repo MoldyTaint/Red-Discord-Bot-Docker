@@ -104,7 +104,9 @@ if [ "$ENABLE_AUDIO" = "true" ]; then
     "managed_node_controller": false,
     "use_managed_node": false,
     "auto_update_managed_node": false,
-    "download_managed_node": false
+    "download_managed_node": false,
+    "java_path": "/usr/bin/java",
+    "java_version": "17"
 }
 EOF
     
