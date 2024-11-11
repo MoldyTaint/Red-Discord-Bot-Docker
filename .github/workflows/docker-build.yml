@@ -109,25 +109,17 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
 
-      # Make package public using GitHub CLI
-      - name: Install GitHub CLI
-        if: github.event_name != 'pull_request'
-        run: |
-          type -p curl >/dev/null || (apt update && apt install curl -y)
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && apt update \
-          && apt install gh -y
-
+      # Make package public using GitHub API directly
       - name: Make package public
         if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api --method PATCH \
-            /orgs/${{ github.repository_owner }}/packages/container/${{ env.IMAGE_NAME }}/visibility \
-            -f visibility='public'
+          curl -X PATCH \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/user/packages/container/${{ env.IMAGE_NAME }}/visibility" \
+            -d '{"visibility":"public"}'
 
       # Create GitHub Release for tags
       - name: Create Release
